@@ -20,16 +20,15 @@ public class GameObject {
     }
 
     public <T extends Component> void addComponent(T component) {
-        component.onAdd(this);
         components.put(component.getClass(), component);
         component.onAdd(this);
     }
 
     public <T extends Component> void removeComponent(T component) {
-        component.onRemove(this);
-
-        if (components.containsKey(component.getClass()))
+        if (components.containsKey(component.getClass())) {
             components.remove(component);
+            component.onRemove();
+        }
         else throw new GameObjectStateException("Cannot remove an nonexistent component.");
     }
 

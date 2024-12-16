@@ -1,4 +1,4 @@
-#version 330 core
+#version 420 core
 
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 aNormal;
@@ -10,8 +10,10 @@ out vec3 Normal;
 out vec4 Color;
 
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+layout(std140, binding = 0) uniform CameraMatrices {
+    mat4 view;
+    mat4 projection;
+};
 uniform vec4 color;
 
 void main() {

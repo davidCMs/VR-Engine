@@ -15,6 +15,10 @@ public class Mesh {
         this.vao = new VAO(new VBO(), new EBO());
         material = defaultMaterial;
     }
+    public Mesh(Mesh mesh) {
+        this.vao = mesh.getVao();
+        this.material = mesh.getMaterial();
+    }
     public Mesh(VAO vao) {
         this.vao = vao;
         material = defaultMaterial;

@@ -6,9 +6,11 @@ public abstract class Component {
     protected GameObject gameObject;
 
     protected void onAdd(GameObject gameObject) {
+        if (this.gameObject != null)
+            onRemove();
         this.gameObject = gameObject;
     }
-    protected void onRemove(GameObject gameObject) {
+    protected void onRemove() {
         this.gameObject = null;
     }
 

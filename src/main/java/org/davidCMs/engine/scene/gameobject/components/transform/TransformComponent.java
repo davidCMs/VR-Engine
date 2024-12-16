@@ -209,8 +209,8 @@ public class TransformComponent extends Component {
     }
 
     @Override
-    public void onRemove(GameObject gameObject) {
-        super.onRemove(gameObject);
+    public void onRemove() {
+        super.onRemove();
         positionListeners.clear();
         rotationListeners.clear();
         scaleListeners.clear();

@@ -70,8 +70,8 @@ public class CameraComponent extends Component {
     }
 
     @Override
-    public void onRemove(GameObject gameObject) {
-        super.onAdd(gameObject);
+    public void onRemove() {
+        super.onRemove();
 
         transform.removePositionListener(positionListener);
         transform.removeRotationListener(rotationListener);

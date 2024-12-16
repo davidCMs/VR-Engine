@@ -503,6 +503,14 @@ public class GLFWWindow {
         glfwSetWindowAttrib(window, GLFW_VISIBLE, ToGLFWBool(visible));
     }
 
+    /**
+     * @param title Sets the title of the window.
+     * @since 0.0.1
+     * */
+    public void setTitle(String title) {
+        glfwSetWindowTitle(window, title);
+    }
+
     /** @param resizable Sets the resizability of the window.
      * @since 0.0.1
      */

@@ -19,7 +19,7 @@ public class VAO extends OpenGLObject {
 
         bind();
 
-        int stride = (3 + 3 + 2) * Float.BYTES;
+        int stride = (3 + 3 + 2 + 4) * Float.BYTES;
 
         GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, stride, 0);
         GL20.glEnableVertexAttribArray(0);
@@ -29,7 +29,11 @@ public class VAO extends OpenGLObject {
 
         GL20.glVertexAttribPointer(2, 2, GL11.GL_FLOAT, false, stride, 6 * Float.BYTES);
         GL20.glEnableVertexAttribArray(2);
+
+        GL20.glVertexAttribPointer(3, 4, GL11.GL_FLOAT, false, stride, 8 * Float.BYTES);
+        GL20.glEnableVertexAttribArray(3);
     }
+
     public VAO(VBO vbo, EBO ebo) {
         this();
         attachVBO(vbo);

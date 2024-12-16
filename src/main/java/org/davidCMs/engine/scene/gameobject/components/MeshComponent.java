@@ -22,8 +22,8 @@ public class MeshComponent extends Component {
     }
 
     @Override
-    public void onRemove(GameObject gameObject) {
-        super.onRemove(gameObject);
+    public void onRemove() {
+        super.onRemove();
     }
 
     @Override

@@ -9,6 +9,7 @@ import org.davidCMs.engine.scene.gameobject.components.CameraComponent;
 import org.davidCMs.engine.scene.gameobject.components.MeshComponent;
 import org.davidCMs.engine.utils.EasingFunctions;
 import org.davidCMs.engine.utils.GlobalRandom;
+import org.davidCMs.engine.utils.ModelLoader;
 import org.davidCMs.engine.window.GLFWException;
 import org.davidCMs.engine.scene.gameobject.components.transform.TransformComponent;
 import org.davidCMs.engine.openxr.*;
@@ -21,9 +22,15 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.assimp.AIMesh;
+import org.lwjgl.assimp.AIScene;
+import org.lwjgl.assimp.Assimp;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.*;
 import org.lwjgl.openxr.*;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL43.*;
@@ -51,17 +58,6 @@ public class Main {
         Scene scene = new Scene();
         SceneRenderer sceneRenderer = new SceneRenderer(scene);
 
-        GameObject gameCamera = new GameObject();
-
-        TransformComponent gameCameraTransformComponent = new TransformComponent(new Vector3f(1,1,1));
-        CameraComponent gameCameraCameraComponent = new CameraComponent();
-
-        gameCamera.addComponent(gameCameraTransformComponent);
-        gameCamera.addComponent(gameCameraCameraComponent);
-
-        gameCameraTransformComponent.setPosition(new Vector3f(0, 10, 15));
-        gameCameraCameraComponent.lookAt(new Vector3f(0,0,0), new Vector3f(0,1,0));
-
         //openXRInstance = new OpenXRInstance();
         //openXRSystem = new OpenXRSystem(openXRInstance);
         //openXRSession = new OpenXRSession(openXRInstance, openXRSystem, gameWindow);
@@ -70,26 +66,7 @@ public class Main {
 
         //eventDataBuffer = XrEventDataBuffer.calloc().type$Default();
 
-        float[] vertices = {
-                0.5f, 0.5f, 0.5f,    0.5f, 0.5f, 0.0f,      0.5f, 0.5f,
-                0.5f, -0.5f, 0.5f,   0.5f, -0.5f, 0.0f,     0.5f, -0.5f,
-                -0.5f, 0.5f, 0.5f,   -0.5f, 0.5f, 0.0f,     -0.5f, 0.5f,
-                -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.0f,    -0.5f, -0.5f,
 
-                0.5f, 0.5f, -0.5f,    0.5f, 0.5f, 0.0f,      0.5f, 0.5f,
-                0.5f, -0.5f, -0.5f,   0.5f, -0.5f, 0.0f,     0.5f, -0.5f,
-                -0.5f, 0.5f, -0.5f,   -0.5f, 0.5f, 0.0f,     -0.5f, 0.5f,
-                -0.5f, -0.5f, -0.5f,  -0.5f, -0.5f, 0.0f,    -0.5f, -0.5f,
-        };
-
-        int[] indices = {
-                2, 6, 7, 2, 3, 7,
-                0, 4, 5, 0, 1, 5,
-                0, 2, 6, 0, 4, 6,
-                1, 3, 7, 1, 5, 7,
-                0, 2, 3, 0, 1, 3,
-                4, 6, 7, 4, 5, 7
-        };
 
         GL.createCapabilities();
 
@@ -97,44 +74,64 @@ public class Main {
             System.err.println("GL CALLBACK: " + GLDebugMessageCallback.getMessage(length, message));
         }, 0);
 
-        int size = 20;
+        GameObject gameCamera = new GameObject();
+        gameCamera.getComponent(TransformComponent.class).setPosition(new Vector3f(0.001f, 0.001f, 100.001f));
+        CameraComponent gameCameraCameraComponent = new CameraComponent();
+        JiggleComponent jiggleComponent = new JiggleComponent();
+        gameCamera.addComponent(jiggleComponent);
+        gameCamera.addComponent(gameCameraCameraComponent);
+        gameCameraCameraComponent.update();
+        
+        int size = 30;
 
+        AIScene aiScene = Assimp.aiImportFile("cube.obj", Assimp.aiProcess_Triangulate);
+        PointerBuffer buffer = aiScene.mMeshes();
 
-        VBO vbo = new VBO(vertices, GLDrawType.STATIC);
-        EBO ebo = new EBO(indices, GLDrawType.STATIC);
-        VAO vao = new VAO(vbo, ebo);
-
+        Mesh mesh = ModelLoader.loadMesh(AIMesh.create(buffer.get(0)), GLDrawType.STATIC);
 
         int iter = 0;
 
         for (int i = size/2*-1; i < size/2; i++) {
             for (int j = size/2*-1; j < size/2; j++) {
+                for (int k = size/2*-1; k < size/2; k++) {
 
-                GameObject gameObject = new GameObject();
-                gameObject.getComponent(TransformComponent.class).setPosition(new Vector3f(i, 0, j));
+                    GameObject gameObject = new GameObject();
+                    gameObject.getComponent(TransformComponent.class).setPosition(new Vector3f(i, k, j));
+                    gameObject.getComponent(TransformComponent.class);
 
-                Material material = new Material();
-                Vector4f color = new Vector4f(
-                        GlobalRandom.random.nextFloat(),
-                        GlobalRandom.random.nextFloat(),
-                        GlobalRandom.random.nextFloat(),
-                        GlobalRandom.random.nextFloat());
-                material.setColor(color);
+                    Material material = new Material();
+                    Vector4f color = new Vector4f(
+                            GlobalRandom.random.nextFloat(),
+                            GlobalRandom.random.nextFloat(),
+                            GlobalRandom.random.nextFloat(),
+                            0.7f);
+                    material.setColor(color);
 
-                Mesh mesh = new Mesh(vao, material);
-                MeshComponent meshComponent = new MeshComponent(mesh);
+                    Mesh coloredMesh = new Mesh(mesh);
+
+                    coloredMesh.setMaterial(material);
+
+                    MeshComponent meshComponent = new MeshComponent(coloredMesh);
 
 
-                gameObject.addComponent(meshComponent);
+                    gameObject.addComponent(meshComponent);
 
-                gameObject.addComponent(new JiggleComponent());
+                    gameObject.addComponent(new JiggleComponent());
 
-                scene.add(gameObject);
-                iter++;
+                    scene.add(gameObject);
+                    iter++;
+                }
             }
         }
 
         System.out.println("looped " + iter + " times");
+
+        AtomicBoolean update = new AtomicBoolean(false);
+
+        gameWindow.addKeyCallback((window, key, scancode, action, mods) -> {
+            if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+                update.set(!update.get());
+        });
 
         float i = 10;
         glfwSwapInterval(0);
@@ -143,6 +140,10 @@ public class Main {
         double deltaTime;
 
         glEnable(GL_DEPTH_TEST);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        int displayUpdate = 0;
 
         while (!gameWindow.shouldClose()) {
             double currentTime = System.nanoTime() / 1_000_000_000.0;
@@ -153,12 +154,14 @@ public class Main {
                 throw new GLFWException("no context?!?!?!!?!?!?!?!?");
 
             //gameObject.getComponent(TransformComponent.class).setRotation(new Quaternionf().rotateXYZ((float) 0, (float) 0, (float) ((float) i* 0.001)));
+            if (update.get()) {
+                scene.update(deltaTime);
+                TransformComponent gct = gameCamera.getComponent(TransformComponent.class);
+                gct.setPosition(gct.getPosition().add((float) 0, (float) 0, (float) (-0.1f*deltaTime)));
 
-            scene.update(deltaTime);
+            }
 
             gameCameraCameraComponent.update();
-
-
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
             glClear(GL_DEPTH_BUFFER_BIT);
             GL11.glClearColor(0f, 0f, 0f, 1.0f);
@@ -167,12 +170,13 @@ public class Main {
 
             gameWindow.swapBuffers();
 
-            int errorCode = GL11.glGetError();
-            if (errorCode != GL11.GL_NO_ERROR) {
-                System.err.println("OpenGL Error: " + errorCode);
-            }
+            i += (float) deltaTime;
 
-            i += deltaTime;
+            if (displayUpdate >= 10) {
+                gameWindow.setTitle("Game, FPS = " + 1 / deltaTime);
+                displayUpdate = 0;
+            }
+            displayUpdate++;
 
             glfwPollEvents();
         }

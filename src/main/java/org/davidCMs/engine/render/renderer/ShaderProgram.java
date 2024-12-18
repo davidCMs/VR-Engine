@@ -3,6 +3,9 @@ package org.davidCMs.engine.render.renderer;
 import org.davidCMs.engine.exceptions.ShaderException;
 import org.davidCMs.engine.render.renderer.oglobjects.Bindable;
 
+import java.util.HashMap;
+import java.util.Vector;
+
 import static org.lwjgl.opengl.GL43.*;
 
 public class ShaderProgram implements Bindable {
@@ -51,6 +54,7 @@ public class ShaderProgram implements Bindable {
     private Shader geom;
 
     private final int shaderProgram;
+    private final HashMap<String, Integer> uniforms = new HashMap<>();
 
     public ShaderProgram() {
         shaderProgram = glCreateProgram();
@@ -86,6 +90,7 @@ public class ShaderProgram implements Bindable {
     }
 
     public void link() {
+        uniforms.clear();
         glLinkProgram(shaderProgram);
     }
 
@@ -100,7 +105,11 @@ public class ShaderProgram implements Bindable {
     }
 
     public int getUniform(String name) {
-        return glGetUniformLocation(shaderProgram, name);
+        if (uniforms.containsKey(name))
+            return uniforms.get(name);
+        int id = glGetUniformLocation(shaderProgram, name);
+        uniforms.put(name, id);
+        return id;
     }
 
     public void setVertexShader(Shader vertex) {

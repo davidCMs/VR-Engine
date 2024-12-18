@@ -4,5 +4,5 @@ import org.joml.Matrix4f;
 
 @FunctionalInterface
 public interface ScaleListener {
-    void onScaleChange(Matrix4f oldTrans, Matrix4f newTrans);
+    void onScaleChange(Matrix4f newTrans);
 }

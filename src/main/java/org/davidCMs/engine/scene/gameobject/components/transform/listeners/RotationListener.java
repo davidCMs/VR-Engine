@@ -4,5 +4,5 @@ import org.joml.Matrix4f;
 
 @FunctionalInterface
 public interface RotationListener {
-    void onRotationChange(Matrix4f oldTrans, Matrix4f newTrans);
+    void onRotationChange(Matrix4f newTrans);
 }

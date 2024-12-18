@@ -17,10 +17,11 @@ public class CameraComponent extends Component {
     private Vector3f up;
     private Matrix4f view;
 
-    private final PositionListener positionListener = ((oldTrans, newTrans) -> update());
-    private final RotationListener rotationListener = ((oldTrans, newTrans) -> update());
+    private final PositionListener positionListener = (newTrans) -> update();
+    private final RotationListener rotationListener = (newTrans) -> update();
 
     public CameraComponent() {
+        view = new Matrix4f();
         cameraTarget = new Vector3f(0,0,0);
         up = new Vector3f(0,1,0);
     }
@@ -31,7 +32,7 @@ public class CameraComponent extends Component {
     }
 
     public Matrix4f getView() {
-        return new Matrix4f(view);
+        return view;
     }
 
     public void update() {
@@ -41,7 +42,7 @@ public class CameraComponent extends Component {
         Quaternionf rotation = transform.getRotation();
         Vector3f position = transform.getPosition();
 
-        view = new Matrix4f()
+        view.identity()
                 .rotate(rotation)
                 .translate(-position.x, -position.y, -position.z);
     }
@@ -51,7 +52,7 @@ public class CameraComponent extends Component {
             throw new GameObjectStateException("Cannot look at as gameObject is null");
 
         this.up = up;
-        view = new Matrix4f().lookAt(transform.getPosition(), target, up);
+        view.identity().lookAt(transform.getPosition(), target, up);
         transform.setRotation(new Quaternionf().setFromNormalized(view));
     }
 

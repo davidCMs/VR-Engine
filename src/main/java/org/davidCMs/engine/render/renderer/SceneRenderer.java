@@ -4,6 +4,7 @@ import org.davidCMs.engine.render.renderer.oglobjects.UBO;
 import org.davidCMs.engine.render.renderer.oglobjects.VAO;
 import org.davidCMs.engine.render.renderer.oglobjects.VBO;
 import org.davidCMs.engine.scene.Scene;
+import org.davidCMs.engine.scene.gameobject.GameObject;
 import org.davidCMs.engine.scene.gameobject.components.MeshComponent;
 import org.davidCMs.engine.scene.gameobject.components.transform.TransformComponent;
 import org.joml.Matrix4f;
@@ -22,6 +23,8 @@ public class SceneRenderer extends Renderer {
     private VAO currentVao;
     private VBO currentVbo;
     private final UBO matrixUBO = new UBO(16 * 2 * Float.BYTES, 0);
+    private final float[] modelMat = new float[16];
+    private final FloatBuffer matrices = MemoryUtil.memAllocFloat(32);
 
     public SceneRenderer(Scene scene) {
         this.scene = scene;
@@ -30,13 +33,11 @@ public class SceneRenderer extends Renderer {
     @Override
     public void render(Matrix4f view, Matrix4f projection) {
 
-        FloatBuffer matrices = MemoryUtil.memAllocFloat(32);
         view.get(0, matrices);
         projection.get(16, matrices);
         matrixUBO.uploadData(matrices, 0);
-        MemoryUtil.memFree(matrices);
 
-        scene.getGameObjects().forEach(gameObject -> {
+        for (GameObject gameObject : scene.getGameObjects()) {
             if (!gameObject.hasComponent(MeshComponent.class))
                 return;
 
@@ -49,7 +50,7 @@ public class SceneRenderer extends Renderer {
                 currentShader = shader;
             }
 
-            float[] modelMat = new float[16];
+
             transformComponent.getTransform().get(modelMat);
 
             VAO vao = meshComponent.getMesh().getVao();
@@ -80,6 +81,6 @@ public class SceneRenderer extends Renderer {
 
             glDrawElements(GL_TRIANGLES, meshComponent.getMesh().getVao().getEbo().getIndices().length, GL_UNSIGNED_INT, 0);
 
-        });
+        }
     }
 }

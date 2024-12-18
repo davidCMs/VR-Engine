@@ -36,6 +36,7 @@ public class TransformComponent extends Component {
     private final Vector<ScaleListener> scaleListeners = new Vector<>();
 
     public TransformComponent() {
+        transform = new Matrix4f();
         position = new Vector3f();
         rotation = new Quaternionf();
         scale = new Vector3f(1, 1, 1);
@@ -63,71 +64,70 @@ public class TransformComponent extends Component {
     /** Updates the {@link TransformComponent#transform} with value from
      * {@link TransformComponent#position}, {@link TransformComponent#rotation}, {@link TransformComponent#scale}.*/
     private void updateTransform() {
-        transform = new Matrix4f().identity()
+        transform.identity()
                 .translate(position)
                 .rotate(rotation)
                 .scale(scale);
     }
 
     /** Triggers all the {@link  PositionListener}s in {@link TransformComponent#positionListeners}. */
-    private void triggerPosListeners(Matrix4f old) {
-        positionListeners.forEach((positionListener -> positionListener.onPositionChange(old, transform)));
+    private void triggerPosListeners() {
+        for (PositionListener positionListener : positionListeners)
+            positionListener.onPositionChange(transform);
     }
     /** Triggers all the {@link  RotationListener}s in {@link TransformComponent#rotationListeners}. */
-    private void triggerRotListeners(Matrix4f old) {
-        rotationListeners.forEach((rotationListener -> rotationListener.onRotationChange(old, transform)));
+    private void triggerRotListeners() {
+        for (RotationListener rotationListener : rotationListeners)
+            rotationListener.onRotationChange(transform);
     }
     /** Triggers all the {@link  ScaleListener}s in {@link TransformComponent#scaleListeners}. */
-    private void triggerSclListeners(Matrix4f old) {
-        scaleListeners.forEach((scaleListener -> scaleListener.onScaleChange(old, transform)));
+    private void triggerSclListeners() {
+        for (ScaleListener scaleListener : scaleListeners)
+            scaleListener.onScaleChange(transform);
     }
 
     /** Sets the {@link TransformComponent#transform}, updates the
      * {@link TransformComponent#position}, {@link TransformComponent#rotation} and {@link TransformComponent#scale}
      * and calls
-     * {@link TransformComponent#triggerPosListeners(Matrix4f)}, 
-     * {@link TransformComponent#triggerRotListeners(Matrix4f)} and 
-     * {@link TransformComponent#triggerSclListeners(Matrix4f)}.
+     * {@link TransformComponent#triggerPosListeners},
+     * {@link TransformComponent#triggerRotListeners} and
+     * {@link TransformComponent#triggerSclListeners}.
      *
      * @param transform the new transform. */
     public void setTransform(Matrix4f transform) {
-        Matrix4f old = new Matrix4f(transform);
-        this.transform = new Matrix4f(transform);
+        this.transform = transform;
 
         transform.getTranslation(position);
         transform.getNormalizedRotation(rotation);
         transform.getScale(scale);
 
-        triggerPosListeners(old);
-        triggerRotListeners(old);
-        triggerSclListeners(old);
+        triggerPosListeners();
+        triggerRotListeners();
+        triggerSclListeners();
     }
     /** Sets the {@link TransformComponent#position}, updates the {@link TransformComponent#transform} and calls
-     * {@link TransformComponent#triggerPosListeners(Matrix4f)}.
+     * {@link TransformComponent#triggerPosListeners}.
      * @param pos the new pos. */
     public void setPosition(Vector3f pos) {
-        Matrix4f old = new Matrix4f(transform);
         position.set(pos);
         updateTransform();
-        triggerPosListeners(old);
+        triggerPosListeners();
     }
     /** Sets the {@link TransformComponent#rotation}, updates the {@link TransformComponent#transform} and calls
-     * {@link TransformComponent#triggerRotListeners(Matrix4f)}.
+     * {@link TransformComponent#triggerRotListeners}.
      * @param rotation the new angle. */
     public void setRotation(Quaternionf rotation) {
-        Matrix4f old = new Matrix4f(transform);
         this.rotation.set(rotation);
         updateTransform();
-        triggerRotListeners(old);
+        triggerRotListeners();
     }
     /** Sets the {@link TransformComponent#scale}, updates the {@link TransformComponent#transform} and calls
-     * {@link TransformComponent#triggerSclListeners(Matrix4f)}.
+     * {@link TransformComponent#triggerSclListeners}.
      * @param scale the new scale.*/
     public void setScale(Vector3f scale) {
-        Matrix4f old = new Matrix4f(transform);
         this.scale.set(scale);
         updateTransform();
-        triggerSclListeners(old);
+        triggerSclListeners();
     }
 
     //todo write java doc
